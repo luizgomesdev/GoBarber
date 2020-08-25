@@ -15,16 +15,17 @@ class AppointmentController {
 
         return response.json(appointments);
     }
+
     public async create(request: Request, response: Response) {
         try {
-            const { provider, date } = request.body;
+            const { provider_id, date } = request.body;
 
             const parsedDate = parseISO(date);
 
             const createAppoint = new CreateAppointmentService();
 
             const appointment = await createAppoint.execute({
-                provider,
+                provider_id,
                 date: parsedDate,
             });
 
