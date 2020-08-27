@@ -3,20 +3,16 @@ import AuthenticateUserService from '../service/AuthenticateUserService';
 
 class SessionsController {
     public async validade(request: Request, response: Response): Promise<any> {
-        try {
-            const { email, password } = request.body;
+        const { email, password } = request.body;
 
-            const authenticateUser = new AuthenticateUserService();
+        const authenticateUser = new AuthenticateUserService();
 
-            const token = await authenticateUser.execute({
-                email,
-                password,
-            });
+        const token = await authenticateUser.execute({
+            email,
+            password,
+        });
 
-            return response.json(token);
-        } catch (err) {
-            return response.status(400).json({ error: err.message });
-        }
+        return response.json(token);
     }
 }
 

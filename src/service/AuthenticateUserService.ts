@@ -6,6 +6,8 @@ import authConfig from '../config/auth';
 
 import UserModel from '../models/UserModel';
 
+import AppError from '../errors/AppErros';
+
 interface RequestDTO {
     email: string;
     password: string;
@@ -23,13 +25,13 @@ export default class AuthenticateUserService {
         const user = await usersRepository.findOne({ where: { email } });
 
         if (!user) {
-            throw new Error('Incorrect email/password combination.');
+            throw new AppError('Incorrect email/password combination.', 401);
         }
 
         const passwordMatached = await compare(password, user.password);
 
         if (!passwordMatached) {
-            throw new Error('Incorrect email/password combination.');
+            throw new AppError('Incorrect email/password combination.', 401);
         }
 
         const token = sign({}, authConfig.jwt.secret, {

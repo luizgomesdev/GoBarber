@@ -8,31 +8,25 @@ import CreateAppointmentService from '../service/CreateAppointmentService';
 
 class AppointmentController {
     public async getAll(request: Request, response: Response) {
-        const appointmentsRepository = getCustomRepository(
-            AppointmentsRepository,
-        );
+        const appointmentsRepository = getCustomRepository(AppointmentsRepository);
         const appointments = await appointmentsRepository.find();
 
         return response.json(appointments);
     }
 
     public async create(request: Request, response: Response) {
-        try {
-            const { provider_id, date } = request.body;
+        const { provider_id, date } = request.body;
 
-            const parsedDate = parseISO(date);
+        const parsedDate = parseISO(date);
 
-            const createAppoint = new CreateAppointmentService();
+        const createAppoint = new CreateAppointmentService();
 
-            const appointment = await createAppoint.execute({
-                provider_id,
-                date: parsedDate,
-            });
+        const appointment = await createAppoint.execute({
+            provider_id,
+            date: parsedDate,
+        });
 
-            return response.json(appointment);
-        } catch (err) {
-            return response.status(400).json({ error: err.message });
-        }
+        return response.json(appointment);
     }
 }
 

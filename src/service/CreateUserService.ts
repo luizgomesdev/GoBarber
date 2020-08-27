@@ -3,6 +3,8 @@ import { hash } from 'bcryptjs';
 
 import UserModel from '../models/UserModel';
 
+import AppError from '../errors/AppErros';
+
 interface RequestDTO {
     name: string;
     email: string;
@@ -17,7 +19,7 @@ export default class CreateUserService {
         });
 
         if (checkUserExist) {
-            throw new Error('Email addres already used.');
+            throw new AppError('Email addres already used.');
         }
 
         const hashedPassword = await hash(password, 8);

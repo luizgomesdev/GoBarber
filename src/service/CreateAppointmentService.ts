@@ -4,12 +4,14 @@ import { getCustomRepository } from 'typeorm';
 import AppointmentModel from '../models/AppointmentModel';
 import AppointmentsRepository from '../repositories/AppointmentRepository';
 
+import AppError from '../errors/AppErros';
+
 interface RequestDTO {
     provider_id: string;
     date: Date;
 }
 
-export default  class CreateAppointmentService {
+export default class CreateAppointmentService {
     public async execute({
         provider_id,
         date,
@@ -25,7 +27,7 @@ export default  class CreateAppointmentService {
         );
 
         if (findAppointmentInSameData) {
-            throw Error('This appointment is already booked');
+            throw new AppError('This appointment is already booked');
         }
 
         const appointment = appointmentsRepository.create({
@@ -38,5 +40,3 @@ export default  class CreateAppointmentService {
         return appointment;
     }
 }
-
-
