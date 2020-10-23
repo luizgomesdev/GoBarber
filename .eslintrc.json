@@ -1,7 +1,8 @@
 {
     "env": {
         "es2020": true,
-        "node": true
+        "node": true,
+        "jest": true
     },
     "extends": [
         "airbnb-base",
@@ -23,6 +24,12 @@
         "import/resolver": {
             "typescript": {}
         },
+        "@typescript-eslint/interface-name-prefix": [
+            "error",
+            {
+                "prefixWithI": "always"
+            }
+        ],
         "import/extensions": [
             "error",
             "ignorePackages",
@@ -30,6 +37,6 @@
                 "ts": "never"
             }
         ],
-        "prettier/prettier": "error",
+        "prettier/prettier": "error"
     }
 }
