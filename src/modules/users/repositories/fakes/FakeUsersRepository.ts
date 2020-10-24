@@ -1,41 +1,55 @@
 import { uuid } from 'uuidv4';
 
-import UserModel from '@modules/users/infra/typeorm/entities/UserModel';
-
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import ICreateUserDTO from '@modules/users/dtos/ICreateUserDTO';
+import IFindAllProvidersDTO from '@modules/users/dtos/IFindAllProvidersDTO';
 
-class UsersRepository implements IUsersRepository {
-    private users: UserModel[] = [];
+import User from '../../infra/typeorm/entities/User';
 
-    public async findById(id: string): Promise<UserModel | undefined> {
-        const user = this.users.find(user => user.uuid === id);
+class FakeUsersRepository implements IUsersRepository {
+  private users: User[] = [];
 
-        return user;
+  public async findById(id: string): Promise<User | undefined> {
+    const findUser = this.users.find(user => user.id === id);
+
+    return findUser;
+  }
+
+  public async findByEmail(email: string): Promise<User | undefined> {
+    const findUser = this.users.find(user => user.email === email);
+
+    return findUser;
+  }
+
+  public async findAllProviders({
+    except_user_id,
+  }: IFindAllProvidersDTO): Promise<User[]> {
+    let { users } = this;
+
+    if (except_user_id) {
+      users = this.users.filter(user => user.id !== except_user_id);
     }
-    public async findByEmail(email: string): Promise<UserModel | undefined> {
-        const user = this.users.find(user => user.email === email);
 
-        return user;
-    }
+    return users;
+  }
 
-    public async create({ name, email, password }: ICreateUserDTO): Promise<UserModel> {
-        const user = new UserModel();
+  public async create(userData: ICreateUserDTO): Promise<User> {
+    const user = new User();
 
-        Object.assign(user, { uuid: uuid(), name, email, password });
+    Object.assign(user, { id: uuid() }, userData);
 
-        this.users.push(user);
+    this.users.push(user);
 
-        return user;
-    }
+    return user;
+  }
 
-    public async save(user: UserModel): Promise<UserModel> {
-        const index = this.users.findIndex(user => user.uuid == user.uuid);
+  public async save(user: User): Promise<User> {
+    const findIndex = this.users.findIndex(findUser => findUser.id === user.id);
 
-        this.users[index] = user;
+    this.users[findIndex] = user;
 
-        return user;
-    }
+    return user;
+  }
 }
 
-export default UsersRepository;
+export default FakeUsersRepository;

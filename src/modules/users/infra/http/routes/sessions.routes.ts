@@ -1,10 +1,20 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
+import { celebrate, Segments, Joi } from 'celebrate';
 
-import AuthenticateController from '@modules/users/infra/http/controllers/SessionsController';
+import SessionsController from '../controllers/SessionsController';
 
-const authenticateController = new AuthenticateController();
-const SessionsRoutes = Router();
+const sessionsRouter = Router();
+const sessionsController = new SessionsController();
 
-SessionsRoutes.post('/', authenticateController.create);
+sessionsRouter.post(
+  '/',
+  celebrate({
+    [Segments.BODY]: {
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+    },
+  }),
+  sessionsController.create,
+);
 
-export default SessionsRoutes;
+export default sessionsRouter;

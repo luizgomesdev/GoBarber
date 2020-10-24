@@ -1,39 +1,61 @@
-import { getRepository, Repository } from 'typeorm';
-
-import UserModel from '@modules/users/infra/typeorm/entities/UserModel';
+import { getRepository, Repository, Not } from 'typeorm';
 
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import ICreateUserDTO from '@modules/users/dtos/ICreateUserDTO';
+import IFindAllProvidersDTO from '@modules/users/dtos/IFindAllProvidersDTO';
+
+import User from '../entities/User';
 
 class UsersRepository implements IUsersRepository {
-    private ormRepository: Repository<UserModel>;
+  private ormRepository: Repository<User>;
 
-    constructor() {
-        this.ormRepository = getRepository(UserModel);
+  constructor() {
+    this.ormRepository = getRepository(User);
+  }
+
+  public async findById(id: string): Promise<User | undefined> {
+    const user = await this.ormRepository.findOne(id);
+
+    return user;
+  }
+
+  public async findByEmail(email: string): Promise<User | undefined> {
+    const user = await this.ormRepository.findOne({
+      where: { email },
+    });
+
+    return user;
+  }
+
+  public async findAllProviders({
+    except_user_id,
+  }: IFindAllProvidersDTO): Promise<User[]> {
+    let users: User[];
+
+    if (except_user_id) {
+      users = await this.ormRepository.find({
+        where: {
+          id: Not(except_user_id),
+        },
+      });
+    } else {
+      users = await this.ormRepository.find();
     }
 
-    public async findById(id: string): Promise<UserModel | undefined> {
-        const user = this.ormRepository.findOne(id);
+    return users;
+  }
 
-        return user;
-    }
-    public async findByEmail(email: string): Promise<UserModel | undefined> {
-        const user = this.ormRepository.findOne({ where: { email } });
+  public async create(userData: ICreateUserDTO): Promise<User> {
+    const appointment = this.ormRepository.create(userData);
 
-        return user;
-    }
+    await this.ormRepository.save(appointment);
 
-    public async create({ name, email, password }: ICreateUserDTO): Promise<UserModel> {
-        const user = this.ormRepository.create({ name, email, password });
+    return appointment;
+  }
 
-        await this.ormRepository.save(user);
-
-        return user;
-    }
-
-    public async save(user: UserModel): Promise<UserModel> {
-        return this.ormRepository.save(user);
-    }
+  public async save(user: User): Promise<User> {
+    return this.ormRepository.save(user);
+  }
 }
 
 export default UsersRepository;

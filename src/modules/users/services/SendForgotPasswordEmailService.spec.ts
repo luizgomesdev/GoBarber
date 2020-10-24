@@ -1,66 +1,65 @@
-import AppError from '@shared/errors/AppErros';
+import AppError from '@shared/errors/AppError';
 
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
-import FakeUserTokensRepository from '@modules/users/repositories/fakes/FakeUserTokensRepository';
-import FakeMailProvider from '@shared/container/providers/MailProvider/fakes/FakeEmailProvider';
-
-import SendForgotPasswordEmailService from '@modules/users/services/SendForgotPasswordEmailService';
+import FakeMailProvider from '@shared/container/providers/MailProvider/fakes/FakeMailProvider';
+import FakeUsersRepository from '../repositories/fakes/FakeUsersRepository';
+import FakeUserTokensRepository from '../repositories/fakes/FakeUserTokensRepository';
+import SendForgotPasswordEmailService from './SendForgotPasswordEmailService';
 
 let fakeUsersRepository: FakeUsersRepository;
 let fakeUserTokensRepository: FakeUserTokensRepository;
 let fakeMailProvider: FakeMailProvider;
-
 let sendForgotPasswordEmail: SendForgotPasswordEmailService;
 
 describe('SendForgotPasswordEmail', () => {
-    beforeEach(() => {
-        fakeUsersRepository = new FakeUsersRepository();
-        fakeMailProvider = new FakeMailProvider();
-        fakeUserTokensRepository = new FakeUserTokensRepository();
+  beforeEach(() => {
+    fakeUsersRepository = new FakeUsersRepository();
+    fakeMailProvider = new FakeMailProvider();
+    fakeUserTokensRepository = new FakeUserTokensRepository();
 
-        sendForgotPasswordEmail = new SendForgotPasswordEmailService(
-            fakeUsersRepository,
-            fakeMailProvider,
-            fakeUserTokensRepository,
-        );
-    });
-    it('should be able to recover the password usign the email', async () => {
-        const sendMail = jest.spyOn(fakeMailProvider, 'sendMail');
+    sendForgotPasswordEmail = new SendForgotPasswordEmailService(
+      fakeUsersRepository,
+      fakeMailProvider,
+      fakeUserTokensRepository,
+    );
+  });
 
-        await fakeUsersRepository.create({
-            name: 'Jhon Doe',
-            email: 'jhondoe@example.com',
-            password: '1234',
-        });
+  it('should be able to recover the password using the email', async () => {
+    const sendMail = jest.spyOn(fakeMailProvider, 'sendMail');
 
-        const user = await sendForgotPasswordEmail.execute({
-            email: 'jhondoe@example.com',
-        });
-
-        expect(sendMail).toHaveBeenCalled();
+    await fakeUsersRepository.create({
+      name: 'John Doe',
+      email: 'johndoe@example.com',
+      password: '123456',
     });
 
-    it('should be able to recover a non-existing user password', async () => {
-        await expect(
-            sendForgotPasswordEmail.execute({
-                email: 'jhondoe@example.com',
-            }),
-        ).rejects.toBeInstanceOf(AppError);
+    await sendForgotPasswordEmail.execute({
+      email: 'johndoe@example.com',
     });
 
-    it('should generate a forgot password token', async () => {
-        const generateToken = jest.spyOn(fakeUserTokensRepository, 'generate');
+    expect(sendMail).toHaveBeenCalled();
+  });
 
-        const user = await fakeUsersRepository.create({
-            name: 'Jhon Doe',
-            email: 'jhondoe@example.com',
-            password: '1234',
-        });
+  it('should not be able to recover a non-existing user password', async () => {
+    await expect(
+      sendForgotPasswordEmail.execute({
+        email: 'johndoe@example.com',
+      }),
+    ).rejects.toBeInstanceOf(AppError);
+  });
 
-        await sendForgotPasswordEmail.execute({
-            email: 'jhondoe@example.com',
-        });
+  it('should generate a forgot passsword token', async () => {
+    const generateToken = jest.spyOn(fakeUserTokensRepository, 'generate');
 
-        expect(generateToken).toHaveBeenCalledWith(user.uuid);
+    const user = await fakeUsersRepository.create({
+      name: 'John Doe',
+      email: 'johndoe@example.com',
+      password: '123456',
     });
+
+    await sendForgotPasswordEmail.execute({
+      email: 'johndoe@example.com',
+    });
+
+    expect(generateToken).toHaveBeenCalledWith(user.id);
+  });
 });
