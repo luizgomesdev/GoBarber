@@ -27,7 +27,7 @@ export default class AuthenticateUserService {
         private usersRepository: IUsersRepository,
 
         @inject('HashProvider')
-        private hasProvider: IHashProvider,
+        private hashProvider: IHashProvider,
     ) {}
 
     public async execute({ email, password }: RequestDTO): Promise<Response> {
@@ -37,7 +37,10 @@ export default class AuthenticateUserService {
             throw new AppError('Incorrect email/password combination.', 401);
         }
 
-        const passwordMatached = await this.hasProvider.compareHash(password, user.password);
+        const passwordMatached = await this.hashProvider.compareHash(
+            password,
+            user.password,
+        );
 
         if (!passwordMatached) {
             throw new AppError('Incorrect email/password combination.', 401);
