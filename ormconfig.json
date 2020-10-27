@@ -18,6 +18,8 @@
         "type": "mongodb",
         "host": "localhost",
         "port": 27017,
+        "username": "root",
+        "password": "AQ!sw2de3",
         "database": "gobarber",
         "useUnifiedTopology": true,
         "entities": ["./src/modules/**/infra/typeorm/schemas/*.ts"]
